@@ -41,7 +41,8 @@
    |cpu
       @0
          $reset = *reset;
-         $pc[31:0] = >>1$reset ? 0: >>1$taken_br ? >>1$br_tgt_pc[31:0]: >>1$pc[31:0] + 32'd4;
+         //$pc[31:0] = >>1$reset ? 0: >>3$valid_taken_br ? >>3$br_tgt_pc[31:0]: $pc[31:0] + 32'd4;
+         $pc[31:0] = >>1$reset ? 0: >>3$valid_taken_br ? >>3$br_tgt_pc[31:0]: >>3$valid ? >>3$inc_pc[31:0] : $pc[31:0];
          $imem_rd_addr[M4_IMEM_INDEX_CNT-1:0] = >>1$reset ? 0: $pc[M4_IMEM_INDEX_CNT+1:2];
          
          $start = !$reset && >>1$reset ? 1: 0;
@@ -79,7 +80,6 @@
                       0;
 
          //-------------------------- Get other instruction fields --------------------------------
-         //-------------------------- Decoding instructions ---------------------------------------
          $opcode[6:0] = $instr[6:0];
          
          $rs1_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
@@ -132,7 +132,7 @@
                          32'bx;
 
          //-------------------------- Register write ----------------------------------------------
-         $rf_wr_en = ($rd[4:0] == 5'b00000) ? 0 : 1;
+         $rf_wr_en = ($rd[4:0] != 5'b00000) && $valid ? 1 : 0;
          ?$rd_valid
             $rf_wr_index[4:0] = $rd[4:0];
             $rf_wr_data[31:0] = $result[31:0];
@@ -141,11 +141,13 @@
          $taken_br = $is_blt && (($src1_value < $src2_value) ^ ($src1_value[31] != $src2_value[31])) ? 1 :
                      $is_jal ? 1 :
                      1'b0;
+         $valid_taken_br = >>3$valid && $taken_br;
          
          //-------------------------- Calculate the new pc ----------------------------------------
          ?$taken_br
          //$br_tgt_pc[31:0] = $taken_br ? $pc[31:0] + $imm[31:0]*2 : 0;
          $br_tgt_pc[31:0] = $pc[31:0] + $imm[31:0]*2;
+         $inc_pc[31:0] = $pc[31:0] + 32'd4;
 
          // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
       //       be sure to avoid having unassigned signals (which you might be using for random inputs)
