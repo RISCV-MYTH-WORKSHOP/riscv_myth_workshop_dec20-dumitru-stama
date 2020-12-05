@@ -76,7 +76,6 @@
                       0;
 
          //-------------------------- Get other instruction fields --------------------------------
-         //-------------------------- Decoding instructions ---------------------------------------
          $opcode[6:0] = $instr[6:0];
          
          $rs1_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
