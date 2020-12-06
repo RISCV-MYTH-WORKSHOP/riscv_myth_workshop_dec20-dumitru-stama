@@ -114,7 +114,8 @@
          $funct7_valid = $is_r_instr;
          ?$funct7_valid
             $funct7[6:0] = $instr[31:25];
-
+         
+      @2
          //-------------------------- Decoding instructions ---------------------------------------
          $dec_bits[10:0] = {$funct7[5], $funct3, $opcode};
          $is_beq   = $dec_bits ==? 11'bx_000_1100011;
@@ -152,8 +153,6 @@
          $is_or    = $dec_bits ==  11'b0_110_0110011;
          $is_and   = $dec_bits ==  11'b0_111_0110011;
          
-         
-      @2
          //-------------------------- Reading registers -------------------------------------------
          $rf_rd_en1 = $rs1_valid ? 1: 0;
          ?$rs1_valid
